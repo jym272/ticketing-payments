@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -eou pipefail
+
+dir=$(dirname "$0")
+source "$dir"/exports
+
+echo -e "\e[1;32mCreating services:\e[0m"
+docker compose -f "$dir"/docker-compose.test.yml up -d
+bash "$dir"/test --build
+
+# TODO: cuando bajar los containers??
+#[ -z "${NODE_ENV:-}" ] && bash "$dir"/down-test-container || echo "NODE_ENV=true, containers not down"

@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+set -eou pipefail
+
+dir=$(dirname "$0")
+source "$dir"/random_functions
+
+port=$(get_random_port_not_used)
+postgres_port=$(get_random_port_not_used)
+random_pepper=$(get_random_secret)
+random_secret=$(get_random_secret)
+nats_server_port=$(get_random_port_not_used)
+
+#app
+export JWT_SECRET=$random_secret
+export NODE_ENV=test
+export PASSWORD_PEPPER=$random_pepper
+export PORT=$port
+
+#nats
+export NATS_SERVER_HOST=localhost
+export NATS_SERVER_PORT=$nats_server_port
+export NACK_DELAY_MS=1000
+
+#postgres
+export POSTGRES_DB=orders
+export POSTGRES_HOST=localhost
+export POSTGRES_PASSWORD=123456
+export POSTGRES_PORT=$postgres_port
+export POSTGRES_USER=jorge
+
+#docker
+export COMPOSE_PROJECT_NAME=orders-api-test

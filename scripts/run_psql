@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -eou pipefail
+# The script is used only in the test context, the variables are already exported
+# The stderr is used to log because the stdout is used to print the result of the command
+
+num_args=$#
+if [[ $num_args -ne 1 ]]; then
+  >&2 echo -e "\e[1;31mInvalid number of arguments. Only one arg\e[0m"
+  exit 1
+fi
+cmd=$1
+>&2 echo "command: $cmd"
+
+dir=$(dirname "$0")
+
+docker compose -f "$dir"/docker-compose.test.yml exec -it db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -t -c "$cmd" -q

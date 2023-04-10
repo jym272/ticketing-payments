@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+set -eou pipefail
+npx --no -- commitlint --edit "${1}"

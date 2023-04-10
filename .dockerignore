@@ -1,0 +1,9 @@
+node_modules
+dist
+Dockerfile
+dev.Dockerfile
+.serverless
+playwright-report
+.webpack
+.env
+.env.**

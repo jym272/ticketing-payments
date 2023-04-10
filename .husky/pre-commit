@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -eou pipefail
+
+npm run lint-staged
+rm -rf tsconfig.tsbuildinfo
+

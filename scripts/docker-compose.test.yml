@@ -1,0 +1,60 @@
+services:
+  nats:
+    image: nats:2.9.15-alpine
+    command: -js -DV -m 8222 -p 4222
+    ports:
+      - ${NATS_SERVER_PORT}:4222
+    healthcheck:
+        test: ["CMD-SHELL", "printf 'GET /healthz?js-enabled-only=true HTTP/1.1\r\nHost: localhost:8222\r\n\r\n' | nc -w 1 localhost 8222 | tail -n 1 | grep -wq '{\"status\":\"ok\"}'"]
+        interval: 1s
+        timeout: 5s
+        retries: 5
+
+  # 3 Formas de conectar el cli con el server de nats,
+  # - usando mount volume con la configuracion de contexto de nats
+  # - usando el archivo Dockerfile donde se ejectuta de antemano un cmd para setear el contexto
+  # - usando NATS_URL como variable de entorno, no hay contexto, pero los cmd de nats usan esta var para el server,
+ #    is equiavelent, to #  -s nats://"$NATS_SERVER_HOST":"$NATS_SERVER_PORT" "$cmd"por lo que no es necesario setear el contexto
+
+  nats-box:
+    image: natsio/nats-box:latest
+#    build:
+#      context: ./nats-box
+#      dockerfile: Dockerfile
+    tty: true
+    stdin_open: true
+#    volumes: # testing without volume and with config server -s
+#      - ./nats:/nsc/.config/nats/
+    healthcheck:
+      test: ["CMD-SHELL", "nats bench test --msgs=10 --pub 5"]
+      interval: 1s
+      timeout: 5s
+      retries: 5
+    environment:
+      - NATS_URL=nats://nats:4222
+      # USE ENV VAR INSTEAD TODO: NATS_URL
+#    entrypoint: nats context add nats --server nats:4222 --description "Testeando ando" --select && "/entrypoint.sh"
+  #    network_mode: "service:nats"
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - ${POSTGRES_PORT}:5432
+    healthcheck:
+      test: ['CMD-SHELL', "psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} -c 'SELECT 1'"]
+      interval: 1s
+      timeout: 5s
+      retries: 5
+
+  waiting-for-the-services-to-be-ready:
+    image: hello-world
+    depends_on:
+      db:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+      nats-box:
+        condition: service_healthy

@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+set -eou pipefail
+
+if [[ $# -gt 1 ]]; then
+  echo -e "\e[1;31mInvalid number of arguments\e[0m"
+  echo -e "\e[1;32mUsage: bash $0 --build\e[0m"
+  exit 1
+fi
+
+arg=""
+if [[ $# -eq 1 && $1 != "--build" ]]; then
+  echo -e "\e[1;31mInvalid argument\e[0m"
+  echo -e "\e[1;32mUsage: bash $0 --build\e[0m"
+  exit 1
+elif [[ $# -eq 1 && $1 == "--build" ]]; then
+  arg=$1
+fi
+
+if [[ $arg == "--build" ]]; then
+  echo -e "\e[1;32mBuilding the project\e[0m"
+  npm run build
+fi
+
+node dist/server.js &
+node_pid=$!
+
+# TODO: quizas los script de test tendrian que estart en la libreria comun
+while ! nc -z localhost "$PORT"; do
+  echo "Waiting for server to start..."
+  if ! kill -0 $node_pid 2>/dev/null; then
+    echo -e "\e[1;31mServer failed to start\e[0m"
+    exit 1
+  fi
+  sleep 0.3
+done
+
+playwright_test_exit_code=1
+
+if npx playwright test; then
+  playwright_test_exit_code=0
+fi
+
+echo "Stopping server..."
+kill $node_pid
+
+if [[ $playwright_test_exit_code -eq 0 ]]; then
+  echo -e "\e[1;32mTests passed\e[0m"
+else
+  echo -e "\e[1;31mTests failed\e[0m"
+  exit 1
+fi
