@@ -56,7 +56,6 @@ export const createAPaymentController = () => {
 
     const descriptionObject = JSON.parse(JSON.stringify(currentUser)) as Record<string, unknown>;
     descriptionObject.order = orderFound;
-    // `source` is obtained with Stripe.js; see https://stripe.com/docs/payments/accept-a-payment-charges#web-create-token
 
     let charge: Stripe.Charge;
 

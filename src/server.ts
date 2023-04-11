@@ -13,7 +13,7 @@ const PORT = getEnvOrFail('PORT');
 void (async () => {
   try {
     await startJetStream({
-      streams: [Streams.ORDERS, Streams.EXPIRATION, Streams.PAYMENTS],
+      streams: [Streams.ORDERS, Streams.PAYMENTS],
       nats: {
         url: `nats://${getEnvOrFail('NATS_SERVER_HOST')}:${getEnvOrFail('NATS_SERVER_PORT')}`
       }
