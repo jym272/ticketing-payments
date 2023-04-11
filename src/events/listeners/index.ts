@@ -1,2 +1,2 @@
 export * from './orderCreated';
-export * from './orderCancelled';
+export * from './orderUpdated';

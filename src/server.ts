@@ -2,7 +2,7 @@ import { initializeSetup, startSetup } from './setup';
 import { utils } from '@jym272ticketing/common';
 const { log, successConnectionMsg } = utils;
 import { getEnvOrFail, rocketEmoji } from '@utils/index';
-import { orderCreatedListener, orderCancelledListener } from '@events/index';
+import { orderCreatedListener, orderUpdatedListener } from '@events/index';
 import { nc, startJetStream, Streams, subjects, subscribe } from '@jym272ticketing/common/dist/events';
 import { createStripeClient } from '@stripe/stripe';
 
@@ -23,7 +23,7 @@ void (async () => {
     server.listen(PORT, () => successConnectionMsg(`${rocketEmoji} Server is running on port ${PORT}`));
     // TODO: logs red and green and yellow with chalk
     void subscribe(subjects.OrderCreated, orderCreatedListener);
-    void subscribe(subjects.OrderCancelled, orderCancelledListener);
+    void subscribe(subjects.OrderUpdated, orderUpdatedListener);
   } catch (error) {
     log(error);
     process.exitCode = 1;
