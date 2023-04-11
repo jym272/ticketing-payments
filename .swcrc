@@ -16,6 +16,7 @@
       "@custom-types/*": ["./src/types/*"],
       "@tests/*": ["./tests/*"],
       "@events/*": ["./src/events/*"],
+      "@stripe/*": ["./src/stripe/*"],
     },
     "baseUrl": "."
   },

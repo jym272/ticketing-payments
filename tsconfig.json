@@ -26,7 +26,8 @@
       "@db/*": ["./src/db/*"],
       "@custom-types/*": ["./src/types/*"],
       "@tests/*": ["./tests/*"],
-      "@events/*": ["./src/events/*"]
+      "@events/*": ["./src/events/*"],
+      "@stripe/*": ["./src/stripe/*"]
     }
   },
   "include": ["src/**/*", "tests/**/*"],

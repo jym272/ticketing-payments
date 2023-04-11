@@ -10,21 +10,10 @@ services:
         timeout: 5s
         retries: 5
 
-  # 3 Formas de conectar el cli con el server de nats,
-  # - usando mount volume con la configuracion de contexto de nats
-  # - usando el archivo Dockerfile donde se ejectuta de antemano un cmd para setear el contexto
-  # - usando NATS_URL como variable de entorno, no hay contexto, pero los cmd de nats usan esta var para el server,
- #    is equiavelent, to #  -s nats://"$NATS_SERVER_HOST":"$NATS_SERVER_PORT" "$cmd"por lo que no es necesario setear el contexto
-
   nats-box:
     image: natsio/nats-box:latest
-#    build:
-#      context: ./nats-box
-#      dockerfile: Dockerfile
     tty: true
     stdin_open: true
-#    volumes: # testing without volume and with config server -s
-#      - ./nats:/nsc/.config/nats/
     healthcheck:
       test: ["CMD-SHELL", "nats bench test --msgs=10 --pub 5"]
       interval: 1s
@@ -32,9 +21,7 @@ services:
       retries: 5
     environment:
       - NATS_URL=nats://nats:4222
-      # USE ENV VAR INSTEAD TODO: NATS_URL
-#    entrypoint: nats context add nats --server nats:4222 --description "Testeando ando" --select && "/entrypoint.sh"
-  #    network_mode: "service:nats"
+
   db:
     image: postgres
     environment:

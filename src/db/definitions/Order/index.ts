@@ -1,5 +1,5 @@
 import { DataTypes, Sequelize } from 'sequelize';
-import { Order, Ticket } from '@db/models';
+import { Order, Payment } from '@db/models';
 import { OrderStatus } from '@jym272ticketing/common/dist/utils';
 
 export const init = (sequelize: Sequelize) => {
@@ -8,8 +8,7 @@ export const init = (sequelize: Sequelize) => {
       id: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        primaryKey: true,
-        autoIncrement: true
+        primaryKey: true
       },
       userId: {
         type: DataTypes.INTEGER,
@@ -18,41 +17,36 @@ export const init = (sequelize: Sequelize) => {
       status: {
         type: DataTypes.ENUM,
         values: Object.values(OrderStatus),
-        allowNull: false,
-        field: 'status',
-        defaultValue: OrderStatus.Created
-      },
-      expiresAt: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        get() {
-          const expiresAt = this.getDataValue('expiresAt');
-          return expiresAt.toISOString();
-        }
+        allowNull: false
       },
       version: {
         type: DataTypes.INTEGER,
-        allowNull: false,
-        defaultValue: 0
-      },
-      ticketId: {
-        type: DataTypes.INTEGER,
         allowNull: false
+      },
+      price: {
+        type: DataTypes.DECIMAL,
+        allowNull: false,
+        get() {
+          return Number(this.getDataValue('price'));
+        }
       },
       createdAt: DataTypes.DATE,
       updatedAt: DataTypes.DATE
     },
     {
       sequelize,
-      tableName: 'order',
-      version: true
+      tableName: 'order'
     }
   );
 };
 
 export const associate = () => {
-  Order.belongsTo(Ticket, {
-    foreignKey: 'ticketId',
-    as: 'ticket'
+  Order.hasOne(Payment, {
+    sourceKey: 'id',
+    foreignKey: {
+      name: 'orderId',
+      allowNull: false
+    },
+    as: 'payment'
   });
 };

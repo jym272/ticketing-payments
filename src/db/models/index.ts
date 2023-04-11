@@ -1,2 +1,2 @@
-export * from './Ticket';
+export * from './Payment';
 export * from './Order';

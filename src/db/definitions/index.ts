@@ -1,9 +1,9 @@
 import { Sequelize } from 'sequelize';
 
-import * as ticket from '@db/definitions/Ticket';
+import * as payment from '@db/definitions/Payment';
 import * as order from '@db/definitions/Order';
 
-const appLabels = [ticket, order];
+const appLabels = [payment, order];
 
 export const initDefinitions = (sequelize: Sequelize) => {
   for (const label of appLabels) {
