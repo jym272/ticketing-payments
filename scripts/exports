@@ -7,14 +7,12 @@ source "$dir"/random_functions
 
 port=$(get_random_port_not_used)
 postgres_port=$(get_random_port_not_used)
-random_pepper=$(get_random_secret)
 random_secret=$(get_random_secret)
 nats_server_port=$(get_random_port_not_used)
 
 #app
 export JWT_SECRET=$random_secret
 export NODE_ENV=test
-export PASSWORD_PEPPER=$random_pepper
 export PORT=$port
 
 #docker
