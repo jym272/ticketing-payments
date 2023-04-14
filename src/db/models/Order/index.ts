@@ -8,7 +8,9 @@ import {
 } from 'sequelize';
 import { OrderStatus } from '@jym272ticketing/common/dist/utils';
 import { Payment } from '@db/models';
-
+interface Ticket {
+  price: number;
+}
 export class Order extends Model<
   // eslint-disable-next-line no-use-before-define -- circular dependency allowed
   InferAttributes<Order, { omit: 'payment' }>,
@@ -20,7 +22,7 @@ export class Order extends Model<
   declare status: OrderStatus;
   // is not versioning this Model, is storing the version of the order in Orders Service ->that model is actually versioning
   declare version: number;
-  declare price: number;
+  declare ticket: Ticket;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
 

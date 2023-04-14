@@ -48,7 +48,7 @@ test.describe('listener: orderUpdated success', () => {
       id,
       userId: user1.userId,
       status: OrderStatus.Created,
-      price
+      ticket: { price }
     });
   });
 
@@ -56,20 +56,20 @@ test.describe('listener: orderUpdated success', () => {
     const newPrice = Number(createAValidPrice());
     const status = getRandomOrderStatus();
     await publishToSubject(subjects.OrderUpdated, {
-      [subjects.OrderUpdated]: { id, version: 1, price: newPrice, status, userId: user2.userId }
+      [subjects.OrderUpdated]: { id, version: 1, ticket: { price: newPrice }, status, userId: user2.userId }
     });
 
     log(`waiting ${graceTime} ms for the listener to process the events`);
     await new Promise(resolve => setTimeout(resolve, graceTime));
     const res = await runPsqlCommandWithTimeout(
-      `select jsonb_build_object('id', id, 'price', price, 'version', version, 'status', status, 'userId', "userId") from "order" where id=${id}`
+      `select jsonb_build_object('id', id,  'ticket', ticket, 'version', version, 'status', status, 'userId', "userId") from "order" where id=${id}`
     );
     if (!res) {
       throw new Error('No result');
     }
     const order = JSON.parse(res) as Order;
     expect(order.id).toBe(id);
-    expect(order.price).toBe(newPrice);
+    expect(order.ticket.price).toBe(newPrice);
     expect(order.version).toBe(1);
     expect(order.status).toBe(status);
     expect(order.userId).toBe(user2.userId);
@@ -87,7 +87,7 @@ test.describe('listener: orderUpdated Order version is not greater than the one 
       id,
       userId: user1.userId,
       status: OrderStatus.Created,
-      price
+      ticket: { price }
     });
   });
 
@@ -98,7 +98,7 @@ test.describe('listener: orderUpdated Order version is not greater than the one 
     const newPrice = Number(createAValidPrice());
     const status = getRandomOrderStatus();
     await publishToSubject(subjects.OrderUpdated, {
-      [subjects.OrderUpdated]: { id, version: 2, price: newPrice, status, userId: user2.userId }
+      [subjects.OrderUpdated]: { id, version: 2, ticket: { price: newPrice }, status, userId: user2.userId }
     });
     // the messages are acknowledged by the listener, but the listener does not process them
     await publishToSubject(subjects.OrderUpdated, {
@@ -111,14 +111,14 @@ test.describe('listener: orderUpdated Order version is not greater than the one 
     log(`waiting ${graceTime} ms for the listener to process the events`);
     await new Promise(resolve => setTimeout(resolve, graceTime));
     const res = await runPsqlCommandWithTimeout(
-      `select jsonb_build_object('id', id, 'price', price, 'version', version, 'status', status,  'userId', "userId") from "order" where id=${id}`
+      `select jsonb_build_object('id', id,  'ticket', ticket, 'version', version, 'status', status,  'userId', "userId") from "order" where id=${id}`
     );
     if (!res) {
       throw new Error('No result');
     }
     const order = JSON.parse(res) as Order;
     expect(order.id).toBe(id);
-    expect(order.price).toBe(newPrice);
+    expect(order.ticket.price).toBe(newPrice);
     expect(order.status).toBe(status);
     expect(order.userId).toBe(user2.userId);
     expect(order.version).toBe(2);
@@ -136,7 +136,7 @@ test.describe('listener: orderUpdated Order version is not consecutive', () => {
       id,
       userId: user1.userId,
       status: OrderStatus.Created,
-      price
+      ticket: { price }
     });
   });
 
@@ -144,14 +144,14 @@ test.describe('listener: orderUpdated Order version is not consecutive', () => {
     const orderUpdated1 = {
       id,
       version: 1,
-      price: Number(createAValidPrice()),
+      ticket: { price: Number(createAValidPrice()) },
       status: getRandomOrderStatus(),
       userId: user2.userId
     };
     const orderUpdated3 = {
       id,
       version: 3,
-      price: Number(createAValidPrice()),
+      ticket: { price: Number(createAValidPrice()) },
       status: getRandomOrderStatus(),
       userId: user3.userId
     };
@@ -169,7 +169,7 @@ test.describe('listener: orderUpdated Order version is not consecutive', () => {
     await new Promise(resolve => setTimeout(resolve, graceTime));
 
     let res = await runPsqlCommandWithTimeout(
-      `select jsonb_build_object('id', id, 'price', price, 'version', version, 'status', status, 'userId', "userId") from "order" where id=${id}`
+      `select jsonb_build_object('id', id,  'ticket', ticket, 'version', version, 'status', status, 'userId', "userId") from "order" where id=${id}`
     );
     if (!res) {
       throw new Error('No result');
@@ -177,7 +177,7 @@ test.describe('listener: orderUpdated Order version is not consecutive', () => {
     let order = JSON.parse(res) as Order;
     expect(order.id).toBe(id);
     expect(order.version).toBe(1);
-    expect(order.price).toBe(orderUpdated1.price);
+    expect(order.ticket.price).toBe(orderUpdated1.ticket.price);
     expect(order.status).toBe(orderUpdated1.status);
     expect(order.userId).toBe(orderUpdated1.userId);
 
@@ -190,7 +190,7 @@ test.describe('listener: orderUpdated Order version is not consecutive', () => {
     await new Promise(resolve => setTimeout(resolve, nackTime));
 
     res = await runPsqlCommandWithTimeout(
-      `select jsonb_build_object('id', id, 'price', price, 'version', version, 'status', status, 'userId', "userId") from "order" where id=${id}`
+      `select jsonb_build_object('id', id,  'ticket', ticket, 'version', version, 'status', status, 'userId', "userId") from "order" where id=${id}`
     );
     if (!res) {
       throw new Error('No result');
@@ -199,7 +199,7 @@ test.describe('listener: orderUpdated Order version is not consecutive', () => {
     // version3 is the last version processed
     expect(order.version).toBe(3);
     expect(order.id).toBe(id);
-    expect(order.price).toBe(orderUpdated3.price);
+    expect(order.ticket.price).toBe(orderUpdated3.ticket.price);
     expect(order.status).toBe(orderUpdated3.status);
     expect(order.userId).toBe(orderUpdated3.userId);
   });
@@ -217,7 +217,7 @@ test.describe('listener: orderUpdated Order does not exist, maybe is not created
     const orderUpdated1 = {
       id,
       version: 1,
-      price: Number(createAValidPrice()),
+      ticket: { price: Number(createAValidPrice()) },
       status: getRandomOrderStatus(),
       userId: user2.userId
     };
@@ -229,25 +229,25 @@ test.describe('listener: orderUpdated Order does not exist, maybe is not created
     log(`waiting ${graceTime} ms for the listener to process the events`);
     await new Promise(resolve => setTimeout(resolve, graceTime));
     let res = await runPsqlCommand(
-      `select jsonb_build_object('id', id, 'status', status, 'price', price, 'version', version, 'userId', "userId") from "order" where id=${id}`
+      `select jsonb_build_object('id', id, 'status', status,  'ticket', ticket, 'version', version, 'userId', "userId") from "order" where id=${id}`
     );
     expect(res.trim()).toBe('');
 
     await publishToSubject(subjects.OrderCreated, {
-      [subjects.OrderCreated]: { id, price, userId: user1.userId, status: OrderStatus.Created, version: 0 }
+      [subjects.OrderCreated]: { id, ticket: { price }, userId: user1.userId, status: OrderStatus.Created, version: 0 }
     });
 
     // the order is created, also the previous event is processed
     log(`waiting ${nackTime} ms for the listener to process the events`);
     await new Promise(resolve => setTimeout(resolve, nackTime));
     res = await runPsqlCommand(
-      `select jsonb_build_object('id', id, 'status', status, 'price', price, 'version', version, 'userId', "userId") from "order" where id=${id}`
+      `select jsonb_build_object('id', id, 'status', status,  'ticket', ticket, 'version', version, 'userId', "userId") from "order" where id=${id}`
     );
     const order = JSON.parse(res) as Order;
     expect(order.id).toBe(id);
     expect(order.version).toBe(1);
     expect(order.status).toBe(orderUpdated1.status);
-    expect(order.price).toBe(orderUpdated1.price);
+    expect(order.ticket.price).toBe(orderUpdated1.ticket.price);
     expect(order.userId).toBe(orderUpdated1.userId);
   });
 });
@@ -264,7 +264,7 @@ test.describe('listener: orderUpdated nack max retries is reached', () => {
     const orderUpdated1 = {
       id,
       version: 1,
-      price: Number(createAValidPrice()),
+      ticket: { price: Number(createAValidPrice()) },
       status: getRandomOrderStatus(),
       userId: user2.userId
     };
@@ -275,7 +275,7 @@ test.describe('listener: orderUpdated nack max retries is reached', () => {
     log(`waiting ${graceTime} ms for the listener to process the events`);
     await new Promise(resolve => setTimeout(resolve, graceTime));
     let res = await runPsqlCommand(
-      `select jsonb_build_object('id', id, 'status', status, 'price', price, 'version', version, 'userId', "userId") from "order" where id=${id}`
+      `select jsonb_build_object('id', id, 'status', status,  'ticket', ticket, 'version', version, 'userId', "userId") from "order" where id=${id}`
     );
     expect(res.trim()).toBe('');
 
@@ -285,19 +285,19 @@ test.describe('listener: orderUpdated nack max retries is reached', () => {
 
     // the order is created, but is not updated by previous events, those events were terminated by max retries
     await publishToSubject(subjects.OrderCreated, {
-      [subjects.OrderCreated]: { id, price, userId: user1.userId, status: OrderStatus.Created, version: 0 }
+      [subjects.OrderCreated]: { id, ticket: { price }, userId: user1.userId, status: OrderStatus.Created, version: 0 }
     });
 
     log(`waiting ${graceTime} ms for the listener to process the events`);
     await new Promise(resolve => setTimeout(resolve, graceTime));
 
     res = await runPsqlCommand(
-      `select jsonb_build_object('id', id, 'status', status, 'price', price, 'version', version, 'userId', "userId") from "order" where id=${id}`
+      `select jsonb_build_object('id', id, 'status', status,  'ticket', ticket, 'version', version, 'userId', "userId") from "order" where id=${id}`
     );
     const order = JSON.parse(res) as Order;
     expect(order.status).toBe(OrderStatus.Created);
     expect(order.id).toBe(id);
-    expect(order.price).toBe(price);
+    expect(order.ticket.price).toBe(price);
     expect(order.version).toBe(0);
     expect(order.userId).toBe(user1.userId);
   });

@@ -40,26 +40,26 @@ test.describe('listener: orderCreated', () => {
   test('it fails because is not version 0', async () => {
     const version = generateA32BitUnsignedInteger();
     await publishToSubject(subjects.OrderCreated, {
-      [subjects.OrderCreated]: { id, price, userId: user1.userId, status: OrderStatus.Created, version }
+      [subjects.OrderCreated]: { id, ticket: { price }, userId: user1.userId, status: OrderStatus.Created, version }
     });
 
     log(`waiting ${graceTime} ms for the listener to process the events`);
     await new Promise(resolve => setTimeout(resolve, graceTime));
     const res = await runPsqlCommand(
-      `select jsonb_build_object('id', id, 'status', status, 'price', price, 'version', version, 'userId', "userId") from "order" where id=${id}`
+      `select jsonb_build_object('id', id, 'status', status, 'price', ticket->>'price', 'version', version, 'userId', "userId") from "order" where id=${id}`
     );
     expect(res.trim()).toBe('');
   });
 
   test('success listening and creating the order', async () => {
     await publishToSubject(subjects.OrderCreated, {
-      [subjects.OrderCreated]: { id, price, userId: user1.userId, status: OrderStatus.Created, version: 0 }
+      [subjects.OrderCreated]: { id, ticket: { price }, userId: user1.userId, status: OrderStatus.Created, version: 0 }
     });
 
     log(`waiting ${graceTime} ms for the listener to process the events`);
     await new Promise(resolve => setTimeout(resolve, graceTime));
     const res = await runPsqlCommandWithTimeout(
-      `select jsonb_build_object('id', id, 'status', status, 'price', price, 'version', version, 'userId', "userId") from "order" where id=${id}`
+      `select jsonb_build_object('id', id, 'status', status,  'ticket', ticket, 'version', version, 'userId', "userId") from "order" where id=${id}`
     );
     if (!res) {
       throw new Error('No result');
@@ -67,7 +67,7 @@ test.describe('listener: orderCreated', () => {
     const order = JSON.parse(res) as Order;
     expect(order.status).toBe(OrderStatus.Created);
     expect(order.id).toBe(id);
-    expect(order.price).toBe(price);
+    expect(order.ticket.price).toBe(price);
     expect(order.version).toBe(0);
     expect(order.userId).toBe(user1.userId);
   });
@@ -84,23 +84,29 @@ test.describe('listener: orderCreated already an order in db', () => {
       id,
       userId: user1.userId,
       status: OrderStatus.Created,
-      price
+      ticket: { price }
     });
   });
   test('fails because is already an order with the same id in db', async () => {
     const newPrice = Number(createAValidPrice());
     await publishToSubject(subjects.OrderCreated, {
-      [subjects.OrderCreated]: { id, price: newPrice, userId: user1.userId, status: OrderStatus.Created, version: 0 }
+      [subjects.OrderCreated]: {
+        id,
+        ticket: { price: newPrice },
+        userId: user1.userId,
+        status: OrderStatus.Created,
+        version: 0
+      }
     });
 
     log(`waiting ${graceTime} ms for the listener to process the events`);
     await new Promise(resolve => setTimeout(resolve, graceTime));
     const res = await runPsqlCommand(
-      `select jsonb_build_object('id', id, 'status', status, 'price', price, 'version', version, 'userId', "userId") from "order" where id=${id}`
+      `select jsonb_build_object('id', id, 'status', status, 'ticket', ticket, 'version', version, 'userId', "userId") from "order" where id=${id}`
     );
     const order = JSON.parse(res) as Order;
-    expect(order.price).not.toBe(newPrice);
-    expect(order.price).toBe(price);
+    expect(order.ticket.price).not.toBe(newPrice);
+    expect(order.ticket.price).toBe(price);
     expect(order.id).toBe(id);
   });
 });

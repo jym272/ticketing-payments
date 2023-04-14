@@ -11,8 +11,10 @@ const { server } = initializeSetup();
 const PORT = getEnvOrFail('PORT');
 
 void (async () => {
+  const queueGroupName = 'payments-service';
   try {
     await startJetStream({
+      queueGroupName,
       streams: [Streams.ORDERS, Streams.PAYMENTS],
       nats: {
         url: `nats://${getEnvOrFail('NATS_SERVER_HOST')}:${getEnvOrFail('NATS_SERVER_PORT')}`
@@ -22,8 +24,8 @@ void (async () => {
     createStripeClient();
     server.listen(PORT, () => successConnectionMsg(`${rocketEmoji} Server is running on port ${PORT}`));
     // TODO: logs red and green and yellow with chalk
-    void subscribe(subjects.OrderCreated, orderCreatedListener);
-    void subscribe(subjects.OrderUpdated, orderUpdatedListener);
+    void subscribe(subjects.OrderCreated, queueGroupName, orderCreatedListener);
+    void subscribe(subjects.OrderUpdated, queueGroupName, orderUpdatedListener);
   } catch (error) {
     log(error);
     process.exitCode = 1;

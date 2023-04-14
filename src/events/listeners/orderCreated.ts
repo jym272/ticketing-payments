@@ -31,7 +31,7 @@ const orderCreated = async (m: JsMsg, order: Order) => {
         id: order.id,
         userId: order.userId,
         status: order.status,
-        price: order.price,
+        ticket: order.ticket,
         version: order.version
       });
       // const pa = await publish(order, subjects.OrderCreated); TODO: publish to the interested, it must be in the transaction

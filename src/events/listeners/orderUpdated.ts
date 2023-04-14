@@ -39,7 +39,7 @@ const orderUpdated = async (m: JsMsg, order: Order) => {
         {
           status: order.status,
           version: order.version,
-          price: order.price,
+          ticket: order.ticket,
           userId: order.userId
         },
         {

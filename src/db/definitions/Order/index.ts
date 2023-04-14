@@ -23,12 +23,9 @@ export const init = (sequelize: Sequelize) => {
         type: DataTypes.INTEGER,
         allowNull: false
       },
-      price: {
-        type: DataTypes.DECIMAL,
-        allowNull: false,
-        get() {
-          return Number(this.getDataValue('price'));
-        }
+      ticket: {
+        type: DataTypes.JSONB,
+        allowNull: false
       },
       createdAt: DataTypes.DATE,
       updatedAt: DataTypes.DATE

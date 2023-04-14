@@ -61,7 +61,7 @@ export const createAPaymentController = () => {
 
     try {
       charge = await stripe.charges.create({
-        amount: createAValidPriceCents(orderFound.price),
+        amount: createAValidPriceCents(orderFound.ticket.price),
         currency: 'usd',
         source: token,
         description: JSON.stringify(descriptionObject)

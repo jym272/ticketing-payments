@@ -11,13 +11,13 @@ const {
   generateA32BitUnsignedInteger,
   generateRandomString,
   getSequenceDataFromNats,
-  insertIntoTableWithReturnJson,
   logFinished,
   logRunning,
   parseMessage,
   truncateTables,
   createAValidPrice,
-  createAValidPriceCents
+  createAValidPriceCents,
+  insertIntoTableWithReturnJson
 } = utils;
 const { BAD_REQUEST, CREATED, UNAUTHORIZED } = httpStatusCodes;
 
@@ -72,7 +72,9 @@ test.describe('routes: /api/payment POST createPayment controller not auth', () 
       status: OrderStatus.Created,
       userId: user1.userId,
       version: 0,
-      price: Number(createAValidPrice())
+      ticket: {
+        price: Number(createAValidPrice())
+      }
     });
   });
   test('not authorized, current user: user2 is not the owner of the order: user1', async ({ request }) => {
@@ -100,7 +102,9 @@ test.describe('routes: /api/payment POST createPayment controller order is cance
       status: OrderStatus.Cancelled,
       userId: user1.userId,
       version: 0,
-      price: Number(createAValidPrice())
+      ticket: {
+        price: Number(createAValidPrice())
+      }
     });
   });
   test('the order requested in db has been cancelled', async ({ request }) => {
@@ -128,7 +132,9 @@ test.describe('routes: /api/payment POST createPayment controller stripe token',
       status: OrderStatus.Created,
       userId: user1.userId,
       version: 0,
-      price: Number(createAValidPrice())
+      ticket: {
+        price: Number(createAValidPrice())
+      }
     });
   });
   test('the charge is error because of token', async ({ request }) => {
@@ -164,7 +170,7 @@ test.describe('routes: /api/payment POST createPayment controller stripe token',
     expect(message).toBe('Payment created.');
     expect(response.status()).toBe(CREATED);
     // validate stripe charge
-    expect(charge.amount).toBe(createAValidPriceCents(order.price));
+    expect(charge.amount).toBe(createAValidPriceCents(order.ticket.price));
     expect(payment.stripeCharge.id).toBe(charge.id);
     expect(payment.stripeCharge.amount).toBe(charge.amount);
     expect(payment.stripeCharge.currency).toBe(charge.currency);
