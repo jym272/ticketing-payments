@@ -8,6 +8,9 @@ import {
 } from 'sequelize';
 import { OrderStatus } from '@jym272ticketing/common/dist/utils';
 import { Payment } from '@db/models';
+
+// only the price is needed, that value can assure that is update, other values can be stored but not used and not updated
+// with the actual values in tickets service <- it would need a subscription to the ticket updated event
 interface Ticket {
   price: number;
 }
