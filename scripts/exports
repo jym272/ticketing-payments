@@ -32,6 +32,5 @@ export POSTGRES_PASSWORD=123456
 export POSTGRES_PORT=$postgres_port
 export POSTGRES_USER=jorge
 
-#stripe -> TODO it must be a secret in Kubernetes
+#stripe
 export STRIPE_SECRET_KEY=sk_test_51Kj8jTFCS8gMf7cqkR3poRy1wCwvY2UihXnp2nbzBdQ6G6XByIGFuoxfCtAGcGBlL2KSRfrtFGE2Vd1hL6XMuDpd00sHGss2ff
-export STRIPE_API_KEY=pk_test_51Kj8jTFCS8gMf7cqOZWAsGqUwFmBKApyhClhQIVuBgNsuLEsrjZ9DFvNcZPU18N5zfMGD7WxmvfrnGIwK2kXfryV00Ks6TAI5P
