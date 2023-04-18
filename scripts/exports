@@ -31,6 +31,3 @@ export POSTGRES_HOST=localhost
 export POSTGRES_PASSWORD=123456
 export POSTGRES_PORT=$postgres_port
 export POSTGRES_USER=jorge
-
-#stripe
-export STRIPE_SECRET_KEY=sk_test_51Kj8jTFCS8gMf7cqkR3poRy1wCwvY2UihXnp2nbzBdQ6G6XByIGFuoxfCtAGcGBlL2KSRfrtFGE2Vd1hL6XMuDpd00sHGss2ff
