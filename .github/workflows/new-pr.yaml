@@ -8,13 +8,29 @@ on:
     paths:
       - 'src/**'
 
+env:
+  FORCE_COLOR: 1
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+      - name: Clean install with dev dependencies
+        run: |
+          npm ci
+      - name: Linting
+        run: |
+          npm run lint
   test:
     runs-on: ubuntu-latest
     environment: testing
     env:
       STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
-      FORCE_COLOR: 1
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -22,12 +38,10 @@ jobs:
           node-version: 18
           cache: 'npm'
       - name: Clean install
-        working-directory: ./src
         run: |
           npm ci --omit=dev
       - run: docker compose -f scripts/docker-compose.test.yml pull
         name: Pulling images
       - name: Run tests
-        working-directory: ./src
         run: |
           npm run test
