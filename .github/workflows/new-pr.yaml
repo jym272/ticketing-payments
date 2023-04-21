@@ -11,12 +11,6 @@ on:
 env:
   FORCE_COLOR: 1
 jobs:
-  pull_images:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Pull images
-        run: docker compose -f scripts/docker-compose.test.yml pull
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -39,7 +33,10 @@ jobs:
     env:
       STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Pull images
+        run: docker compose -f scripts/docker-compose.test.yml pull
       - uses: actions/setup-node@v3
         with:
           node-version: 18
