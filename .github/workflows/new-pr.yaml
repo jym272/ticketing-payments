@@ -15,13 +15,14 @@ jobs:
       COMPOSE_PROJECT_NAME: payments-api-test
     steps:
       - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
       - name: Clean install only the dependencies
         working-directory: ./src
         run: |
           npm ci --omit=dev
-      - run: docker compose -f scripts/docker-compose.test.yml pull
-      - uses: satackey/action-docker-layer-caching@v0.0.11
-        continue-on-error: true
       - name: Run tests
         working-directory: ./src
         run: |
