@@ -9,6 +9,7 @@ const { createAValidPriceCents, OrderStatus, httpStatusCodes, throwError, parseS
 const { CREATED, BAD_REQUEST, INTERNAL_SERVER_ERROR, UNAUTHORIZED } = httpStatusCodes;
 const sequelize = getSequelizeClient();
 
+// SOME COMMENT
 export const createAPaymentController = () => {
   return async (req: Request, res: Response) => {
     const { token, orderId } = req.body as { token: string; orderId: string };
