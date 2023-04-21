@@ -12,7 +12,6 @@ jobs:
     environment: testing
     env:
       STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
-      COMPOSE_PROJECT_NAME: payments-api-test
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -23,7 +22,7 @@ jobs:
         working-directory: ./src
         run: |
           npm ci --omit=dev
-      - run: export COMPOSE_PROJECT_NAME=payments-api-test && docker compose -f scripts/docker-compose.test.yml pull
+      - run: docker compose -f scripts/docker-compose.test.yml pull
       - uses: satackey/action-docker-layer-caching@v0.0.11
         continue-on-error: true
       - name: Run tests
