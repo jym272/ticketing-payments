@@ -28,10 +28,13 @@ jobs:
       - run: docker compose -f scripts/docker-compose.test.yml pull
       - uses: satackey/action-docker-layer-caching@v0.0.11
         with:
-          key: docker-layer-cache-{hash}
+          key: docker-layer-caching-${{ github.workflow }}-${{ github.event_name }}-${{ github.head_ref || github.ref }}-{hash}
           restore-keys: |
-            docker-layer-cache-
-            layer-docker-layer-cache-
+            docker-layer-caching-${{ github.workflow }}-${{ github.event_name }}-${{ github.head_ref || github.ref }}-{hash}
+            docker-layer-caching-${{ github.workflow }}-${{ github.event_name }}-${{ github.head_ref || github.ref }}
+            docker-layer-caching-${{ github.workflow }}-${{ github.event_name }}
+            docker-layer-caching-${{ github.workflow }}
+            docker-layer-caching-
         continue-on-error: true
       - name: Run tests
         working-directory: ./src
