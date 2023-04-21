@@ -24,6 +24,11 @@ jobs:
           npm ci --omit=dev
       - run: docker compose -f scripts/docker-compose.test.yml pull
       - uses: satackey/action-docker-layer-caching@v0.0.11
+        with:
+          key: docker-layer-cache-{hash}
+          restore-keys: |
+            docker-layer-cache-
+            layer-docker-layer-cache-
         continue-on-error: true
       - name: Run tests
         working-directory: ./src
