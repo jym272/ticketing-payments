@@ -7,15 +7,15 @@ on:
 #    types: [opened, synchronize]
 
 jobs:
-build:
-  runs-on: ubuntu-latest
-  steps:
-    - uses: actions/checkout@v3
-    - name: Clean install only the dependencies
-      working-directory: ./src
-      run: |
-        npm ci --omit=dev
-    - name: Run tests
-      working-directory: ./src
-      run: |
-        npm run test
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Clean install only the dependencies
+        working-directory: ./src
+        run: |
+          npm ci --omit=dev
+      - name: Run tests
+        working-directory: ./src
+        run: |
+          npm run test
