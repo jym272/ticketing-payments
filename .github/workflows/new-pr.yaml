@@ -11,6 +11,12 @@ on:
 env:
   FORCE_COLOR: 1
 jobs:
+  pull_images:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Pull images
+        run: docker compose -f scripts/docker-compose.test.yml pull
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -29,6 +35,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     environment: testing
+    depends-on: pull_images
     env:
       STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
     steps:
@@ -40,8 +47,6 @@ jobs:
       - name: Clean install
         run: |
           npm ci --omit=dev
-      - run: docker compose -f scripts/docker-compose.test.yml pull
-        name: Pulling images
       - name: Run tests
         run: |
           npm run test
