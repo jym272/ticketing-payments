@@ -21,13 +21,12 @@ jobs:
         with:
           node-version: 18
           cache: 'npm'
-      - name: Clean install only the dependencies
+      - name: Clean install
         working-directory: ./src
         run: |
           npm ci --omit=dev
       - run: docker compose -f scripts/docker-compose.test.yml pull
-      - uses: satackey/action-docker-layer-caching@v0.0.11
-        continue-on-error: true
+        name: Pulling images
       - name: Run tests
         working-directory: ./src
         run: |
