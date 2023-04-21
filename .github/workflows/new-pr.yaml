@@ -12,12 +12,16 @@ jobs:
     environment: testing
     env:
       STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+      COMPOSE_PROJECT_NAME: payments-api-test
     steps:
       - uses: actions/checkout@v3
       - name: Clean install only the dependencies
         working-directory: ./src
         run: |
           npm ci --omit=dev
+      - run: docker compose -f scripts/docker-compose.test.yml pull
+      - uses: satackey/action-docker-layer-caching@v0.0.11
+        continue-on-error: true
       - name: Run tests
         working-directory: ./src
         run: |
