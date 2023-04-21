@@ -35,7 +35,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     environment: testing
-    depends-on: pull_images
+    needs: pull_images
     env:
       STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
     steps:
