@@ -29,7 +29,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     environment: testing
-    needs: pull_images
     env:
       STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
     steps:
