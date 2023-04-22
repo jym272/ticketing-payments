@@ -1,4 +1,4 @@
-name: Code Quality Check
+name: code_quality_check
 
 on:
   workflow_dispatch:
@@ -10,9 +10,11 @@ on:
 
 env:
   FORCE_COLOR: 1
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   lint:
     timeout-minutes: 2
@@ -24,8 +26,6 @@ jobs:
         with:
           node-version: 18
           cache: 'npm'
-      - name: echo github.workspace
-        run: echo ${{ github.workflow }}-${{ github.ref }}
       - name: Clean install with dev dependencies
         run: |
           npm ci
