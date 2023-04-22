@@ -23,7 +23,6 @@ void (async () => {
     await startSetup(server);
     createStripeClient();
     server.listen(PORT, () => successConnectionMsg(`${rocketEmoji} Server is running on port ${PORT}`));
-    // TODO: logs red and green and yellow with chalk
     void subscribe(subjects.OrderCreated, queueGroupName, orderCreatedListener);
     void subscribe(subjects.OrderUpdated, queueGroupName, orderUpdatedListener);
   } catch (error) {
