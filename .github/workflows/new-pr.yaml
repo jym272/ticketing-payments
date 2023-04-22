@@ -8,6 +8,8 @@ on:
       - 'src/**'
       - 'tests/**'
 
+defaults:
+  timeout-minutes: 2
 env:
   FORCE_COLOR: 1
 jobs:
