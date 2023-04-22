@@ -24,7 +24,8 @@ jobs:
         with:
           node-version: 18
           cache: 'npm'
-      - run: env
+      - name: echo github.workspace
+        run: echo ${{ github.workflow }}-${{ github.ref }}
       - name: Clean install with dev dependencies
         run: |
           npm ci
