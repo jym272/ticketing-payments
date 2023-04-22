@@ -9,7 +9,7 @@ import { createStripeClient } from '@stripe/stripe';
 const { server } = initializeSetup();
 
 const PORT = getEnvOrFail('PORT');
-//
+// This is a comment
 void (async () => {
   const queueGroupName = 'payments-service';
   try {
