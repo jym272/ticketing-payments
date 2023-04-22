@@ -8,8 +8,6 @@ on:
       - 'src/**'
       - 'tests/**'
 
-defaults:
-  timeout-minutes: 2
 env:
   FORCE_COLOR: 1
 concurrency:
@@ -17,6 +15,7 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 jobs:
   lint:
+    timeout-minutes: 2
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -33,6 +32,7 @@ jobs:
         run: |
           npm run lint
   test:
+    timeout-minutes: 2
     runs-on: ubuntu-latest
     environment: testing
     env:
