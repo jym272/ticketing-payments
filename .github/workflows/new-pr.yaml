@@ -15,3 +15,4 @@ concurrency:
 jobs:
   code_quality_check:
     uses: ./.github/workflows/code-quality-check.yml
+    secrets: inherit
