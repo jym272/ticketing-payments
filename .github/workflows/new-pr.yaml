@@ -55,20 +55,11 @@ jobs:
           issue-number: ${{ github.event.number }}
           comment-author: 'github-actions[bot]'
       - name: Update Comment
-        env:
-          JOB_PATH: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ env.CURRENT_JOB_ID }}"
-          ARTIFACT_URL: "${{ github.server_url }}/${{ github.repository }}/suites/$SUITE_ID/artifacts/$ARTIFACT_ID"
         uses: peter-evans/create-or-update-comment@v3
         with:
           issue-number: ${{ github.event.number }}
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
           edit-mode: replace
-          body: |-
-            ![badge]
-            
-            Build Successful! You can find a link to the downloadable artifact below.
-            
-            | Name     | Link                    |
-            | -------- | ----------------------- |
-            | Logs     | ${{ env.JOB_PATH }}     |
-            | Download | ${{ env.ARTIFACT_URL }} |
+          body:  |
+            **Edit:** Some additional info
+          reactions: eyes
