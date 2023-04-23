@@ -74,7 +74,7 @@ jobs:
       -
         name: Set Output if tests fail
         id: failure-test
-        if: ${{ steps.upload-report.outcome == 'success' }}
+        if: ${{ failure() && steps.upload-report.outcome == 'success' }}
         run: |
           echo "TESTS_FAILED=true" >> $GITHUB_OUTPUT
       
