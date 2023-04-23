@@ -41,6 +41,41 @@ jobs:
       pull-requests: write
     steps:
       -
+        name: Download artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: pull_request.yml
+          run_id: ${{ github.event.workflow_run.id }}
+          name: test-report
+      -
+        name: Show report
+        run: |
+          ls -la 
+          ls -la test-report
+          cat test-report/test-results.json | jq
+      -
+        name: Analize report
+        run: |
+          # Extract the status field and count the number of times each value occurs
+          status_counts=$(jq '.suites[].suites[].specs[].tests[].status' test-results.json | sort | uniq -c)
+          
+          # Extract the count of the "expected" status value
+          count_expected=$(echo "$status_counts" | awk '$2 == "\"expected\"" {print $1}')
+          
+          # Extract the count of the "unexpected" status value
+          count_unexpected=$(echo "$status_counts" | awk '$2 == "\"unexpected\"" {print $1}')
+          
+          # if count_unexpected is not empty, exit with 1
+          if [[ -n "$count_unexpected" ]]; then
+            echo "Unexpected statuses found"
+          else
+            echo "No unexpected statuses found"
+          fi
+        
+          # Print the counts
+          echo "Number of expected statuses: $count_expected"
+          echo "Number of unexpected statuses: $count_unexpected"
+      -
         name: Prepare Links
         env:
           GITHUB_TOKEN: ${{ github.token }}
