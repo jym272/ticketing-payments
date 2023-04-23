@@ -36,7 +36,6 @@ jobs:
     needs: [ code_quality_check ]
     if: ${{ failure() && needs.code_quality_check.outputs.tests-failed == 'true' }}
     steps:
-      - run: echo ${{ toJson(github.event) }}
       - name: Get Artifact and Pull request info
         env:
           GITHUB_TOKEN: ${{ github.token }}
