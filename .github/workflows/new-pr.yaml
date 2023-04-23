@@ -43,11 +43,6 @@ jobs:
           OWNER: ${{ github.repository_owner }}
           REPO: ${{ github.event.repository.name }}
         run: |
-          # Set PR_NUMBER to the PR number if it is a pull request
-          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
-            PR_NUMBER=$GITHUB_EVENT_NUMBER
-            echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV  
-          fi
           # Current job id
           CURRENT_JOB_ID=$(echo $GITHUB_JOB | cut -d'.' -f1)
           # Set in github env the CURRENT_JOB_ID
@@ -57,7 +52,7 @@ jobs:
         uses: peter-evans/find-comment@v2
         id: find-comment
         with:
-          issue-number: ${{ env.PR_NUMBER }}
+          issue-number: ${{ github.event.number }}
           comment-author: 'github-actions[bot]'
       - name: Update Comment
         env:
@@ -66,7 +61,7 @@ jobs:
           HEAD_SHA: "${{ env.HEAD_SHA }}"
         uses: peter-evans/create-or-update-comment@v3
         with:
-          issue-number: ${{ env.PR_NUMBER }}
+          issue-number: ${{ github.event.number }}
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
           edit-mode: replace
           body: |-
