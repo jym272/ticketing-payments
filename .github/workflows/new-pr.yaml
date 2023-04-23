@@ -14,4 +14,4 @@ concurrency:
 
 jobs:
   code_quality_check:
-    uses: ./.github/workflows/reusable/code-quality-check.yml
+    uses: ./.github/workflows/code-quality-check.yml
