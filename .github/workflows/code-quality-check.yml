@@ -10,7 +10,7 @@ on:
     outputs:
       tests-failed:
         description: "Specifies whether the given commands failed"
-        value: ${{ steps.failure-test.outputs.TESTS_FAILED }}
+        value: ${{ jobs.test.outputs.TESTS_FAILED }}
     # TODO: if a test fail a report has to be generated and sent to the PR, OUTPUT
 env:
   # Log color in the test output
