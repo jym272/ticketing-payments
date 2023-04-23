@@ -8,6 +8,7 @@ on:
       - pull_request
 jobs:
   delete-comment:
+    timeout-minutes: 2
     if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     permissions:
@@ -34,6 +35,7 @@ jobs:
             -H "X-GitHub-Api-Version: 2022-11-28" \
             /repos/${{ github.repository }}/issues/comments/${{ steps.find-comment.outputs.comment-id }}
   comment:
+    timeout-minutes: 2
     if: github.event.workflow_run.conclusion == 'failure'
     runs-on: ubuntu-latest
     permissions:
