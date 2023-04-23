@@ -33,6 +33,9 @@ jobs:
 #          repo-owner: ${{ github.repository_owner }}
   comment-on-pr:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     needs: [ code_quality_check ]
     if: ${{ failure() && needs.code_quality_check.outputs.tests-failed == 'true' }}
     steps:
