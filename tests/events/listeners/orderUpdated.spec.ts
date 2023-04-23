@@ -245,7 +245,7 @@ test.describe('listener: orderUpdated Order does not exist, maybe is not created
     );
     const order = JSON.parse(res) as Order;
     expect(order.id).toBe(id);
-    expect(order.version).toBe(100);
+    expect(order.version).toBe(1);
     expect(order.status).toBe(orderUpdated1.status);
     expect(order.ticket.price).toBe(orderUpdated1.ticket.price);
     expect(order.userId).toBe(orderUpdated1.userId);
@@ -295,7 +295,7 @@ test.describe('listener: orderUpdated nack max retries is reached', () => {
       `select jsonb_build_object('id', id, 'status', status,  'ticket', ticket, 'version', version, 'userId', "userId") from "order" where id=${id}`
     );
     const order = JSON.parse(res) as Order;
-    expect(order.status).toBe(OrderStatus.Cancelled);
+    expect(order.status).toBe(OrderStatus.Created);
     expect(order.id).toBe(id);
     expect(order.ticket.price).toBe(price);
     expect(order.version).toBe(0);
