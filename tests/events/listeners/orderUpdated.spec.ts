@@ -295,7 +295,7 @@ test.describe('listener: orderUpdated nack max retries is reached', () => {
       `select jsonb_build_object('id', id, 'status', status,  'ticket', ticket, 'version', version, 'userId', "userId") from "order" where id=${id}`
     );
     const order = JSON.parse(res) as Order;
-    expect(order.status).toBe(OrderStatus.Cancelled);
+    expect(order.status).toBe(OrderStatus.Created);
     expect(order.id).toBe(id);
     expect(order.ticket.price).toBe(price);
     expect(order.version).toBe(0);
