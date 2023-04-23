@@ -51,6 +51,7 @@ jobs:
 
           echo "check_suite_id: ${check_suite_id}"
   
+          echo "ARTIFACT_NAME: ${ARTIFACT_NAME}"
           artifact_id=$(gh api \
             /repos/${{ github.repository }}/actions/artifacts \
             | jq -r ".artifacts[] | select(.name == \"${ARTIFACT_NAME}\" and .expired == false) | select(.workflow_run.id == ${{ github.run_id }}) | .id")
