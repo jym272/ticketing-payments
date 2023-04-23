@@ -21,7 +21,7 @@ jobs:
         with:
           issue-number: ${{ github.event.workflow_run.pull_requests[0].number }}
           comment-author: 'github-actions[bot]'
-          body-includes: Links for artifacts
+          body-includes: tests_result_table
       -
         name: Delete Comment
         if: steps.find-comment.outputs.comment-id != ''
@@ -47,10 +47,6 @@ jobs:
           workflow: pull_request.yml
           run_id: ${{ github.event.workflow_run.id }}
           name: test-report
-      -
-        name: Show report
-        run: |
-          ls -la 
       -
         name: Analyze report
         id: analyze-report
@@ -132,14 +128,16 @@ jobs:
           echo "HEAD_SHA=$HEAD_SHA" >> "$GITHUB_ENV"
       -
         name: Find Comment
+        if: ${{ steps.analyze-report.outputs.failed_test == 'true' }}
         uses: peter-evans/find-comment@v2
         id: find-comment
         with:
           issue-number: ${{ env.PR_NUMBER }}
           comment-author: 'github-actions[bot]'
-          body-includes: Links for artifacts
+          body-includes: tests_result_table
       -
         name: Create or update comment
+        if: ${{ steps.analyze-report.outputs.failed_test == 'true' }}
         uses: peter-evans/create-or-update-comment@v3
         env:
           JOB_PATH: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ env.PREVIOUS_JOB_ID }}"
@@ -151,16 +149,15 @@ jobs:
           edit-mode: replace
           body: |-
             ![badge]
+            <!---
+            tests_result_table
+            -->
             
-            ![Test Results](https://img.shields.io/badge/Test_Results-${{ steps.analyze-report.outputs.count_expected }}_Passed%20%7C%20${{ steps.analyze-report.outputs.count_unexpected }}%20Failed-red?style=for-the-badge&labelColor=0d1117&logo=data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+CjxzdmcgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOmNjPSJodHRwOi8vd2ViLnJlc291cmNlLm9yZy9jYy8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6c3ZnPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgaWQ9InN2ZzIiIHZpZXdCb3g9IjAgMCA4NC44NTMgODQuODUzIiB2ZXJzaW9uPSIxLjAiPgogIDxnIGlkPSJsYXllcjEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0xNTMuMjkgLTEzMi43OSkiPgogICAgPGcgaWQ9ImcyNzYyIiB0cmFuc2Zvcm09Im1hdHJpeCguNzA3MTEgLS43MDcxMSAuNzA3MTEgLjcwNzExIC02Ni41NzUgMTg5LjcxKSIgZmlsbD0icmVkIj4KICAgICAgPHJlY3QgaWQ9InJlY3QxODcyIiB5PSIxNjUuMjIiIHdpZHRoPSIxMDAiIHg9IjE0NS43MSIgaGVpZ2h0PSIyMCIvPgogICAgICA8cmVjdCBpZD0icmVjdDE4NzQiIHRyYW5zZm9ybT0icm90YXRlKDkwKSIgaGVpZ2h0PSIyMCIgd2lkdGg9IjEwMCIgeT0iLTIwNS43MSIgeD0iMTI1LjIyIi8+CiAgICA8L2c+CiAgPC9nPgogIDxtZXRhZGF0YT4KICAgIDxyZGY6UkRGPgogICAgICA8Y2M6V29yaz4KICAgICAgICA8ZGM6Zm9ybWF0PmltYWdlL3N2Zyt4bWw8L2RjOmZvcm1hdD4KICAgICAgICA8ZGM6dHlwZSByZGY6cmVzb3VyY2U9Imh0dHA6Ly9wdXJsLm9yZy9kYy9kY21pdHlwZS9TdGlsbEltYWdlIi8+CiAgICAgICAgPGNjOmxpY2Vuc2UgcmRmOnJlc291cmNlPSJodHRwOi8vY3JlYXRpdmVjb21tb25zLm9yZy9saWNlbnNlcy9wdWJsaWNkb21haW4vIi8+CiAgICAgICAgPGRjOnB1Ymxpc2hlcj4KICAgICAgICAgIDxjYzpBZ2VudCByZGY6YWJvdXQ9Imh0dHA6Ly9vcGVuY2xpcGFydC5vcmcvIj4KICAgICAgICAgICAgPGRjOnRpdGxlPk9wZW5jbGlwYXJ0PC9kYzp0aXRsZT4KICAgICAgICAgIDwvY2M6QWdlbnQ+CiAgICAgICAgPC9kYzpwdWJsaXNoZXI+CiAgICAgICAgPGRjOnRpdGxlPlggaWNvbjwvZGM6dGl0bGU+CiAgICAgICAgPGRjOmRhdGU+MjAwOC0wNC0wNFQwMzoyODo1MjwvZGM6ZGF0ZT4KICAgICAgICA8ZGM6ZGVzY3JpcHRpb24+R2FtZSBEZXNpZ24gZm9yIHB5d2VlayM2PC9kYzpkZXNjcmlwdGlvbj4KICAgICAgICA8ZGM6c291cmNlPmh0dHA6Ly9vcGVuY2xpcGFydC5vcmcvZGV0YWlsLzE2MTU1L3gtaWNvbi1ieS1taWxrZXItMTYxNTU8L2RjOnNvdXJjZT4KICAgICAgICA8ZGM6Y3JlYXRvcj4KICAgICAgICAgIDxjYzpBZ2VudD4KICAgICAgICAgICAgPGRjOnRpdGxlPm1pbGtlcjwvZGM6dGl0bGU+CiAgICAgICAgICA8L2NjOkFnZW50PgogICAgICAgIDwvZGM6Y3JlYXRvcj4KICAgICAgICA8ZGM6c3ViamVjdD4KICAgICAgICAgIDxyZGY6QmFnPgogICAgICAgICAgICA8cmRmOmxpPmNsaXAgYXJ0PC9yZGY6bGk+CiAgICAgICAgICAgIDxyZGY6bGk+Y2xpcGFydDwvcmRmOmxpPgogICAgICAgICAgICA8cmRmOmxpPmdhbWU8L3JkZjpsaT4KICAgICAgICAgICAgPHJkZjpsaT5pY29uPC9yZGY6bGk+CiAgICAgICAgICAgIDxyZGY6bGk+aW1hZ2U8L3JkZjpsaT4KICAgICAgICAgICAgPHJkZjpsaT5tZWRpYTwvcmRmOmxpPgogICAgICAgICAgICA8cmRmOmxpPnBuZzwvcmRmOmxpPgogICAgICAgICAgICA8cmRmOmxpPnB1YmxpYyBkb21haW48L3JkZjpsaT4KICAgICAgICAgICAgPHJkZjpsaT5zdmc8L3JkZjpsaT4KICAgICAgICAgIDwvcmRmOkJhZz4KICAgICAgICA8L2RjOnN1YmplY3Q+CiAgICAgIDwvY2M6V29yaz4KICAgICAgPGNjOkxpY2Vuc2UgcmRmOmFib3V0PSJodHRwOi8vY3JlYXRpdmVjb21tb25zLm9yZy9saWNlbnNlcy9wdWJsaWNkb21haW4vIj4KICAgICAgICA8Y2M6cGVybWl0cyByZGY6cmVzb3VyY2U9Imh0dHA6Ly9jcmVhdGl2ZWNvbW1vbnMub3JnL25zI1JlcHJvZHVjdGlvbiIvPgogICAgICAgIDxjYzpwZXJtaXRzIHJkZjpyZXNvdXJjZT0iaHR0cDovL2NyZWF0aXZlY29tbW9ucy5vcmcvbnMjRGlzdHJpYnV0aW9uIi8+CiAgICAgICAgPGNjOnBlcm1pdHMgcmRmOnJlc291cmNlPSJodHRwOi8vY3JlYXRpdmVjb21tb25zLm9yZy9ucyNEZXJpdmF0aXZlV29ya3MiLz4KICAgICAgPC9jYzpMaWNlbnNlPgogICAgPC9yZGY6UkRGPgogIDwvbWV0YWRhdGE+Cjwvc3ZnPgo=)
+            | Name          | Link                    |
+            | --------      | ----------------------- |
+            | Last Commit   | ${{ env.HEAD_SHA }}     |
+            | Logs          | ${{ env.JOB_PATH }}     |
+            | Download      | ${{ env.ARTIFACT_URL }} |
             
-            Links for artifacts
-            
-            | Name     | Link                    |
-            | -------- | ----------------------- |
-            | Commit   | ${{ env.HEAD_SHA }}     |
-            | Logs     | ${{ env.JOB_PATH }}     |
-            | Download | ${{ env.ARTIFACT_URL }} |
-            
-            [badge]: https://img.shields.io/badge/Build_Success!-0d1117?style=for-the-badge&labelColor=3fb950&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSIjZmZmZmZmIj48cGF0aCBkPSJNMjEuMDMgNS43MmEuNzUuNzUgMCAwIDEgMCAxLjA2bC0xMS41IDExLjVhLjc0Ny43NDcgMCAwIDEtMS4wNzItLjAxMmwtNS41LTUuNzVhLjc1Ljc1IDAgMSAxIDEuMDg0LTEuMDM2bDQuOTcgNS4xOTVMMTkuOTcgNS43MmEuNzUuNzUgMCAwIDEgMS4wNiAwWiI+PC9wYXRoPjwvc3ZnPg==
+            [badge]: https://img.shields.io/badge/Test_Results-${{ steps.analyze-report.outputs.count_expected }}_Passed%20%7C%20${{ steps.analyze-report.outputs.count_unexpected }}%20Failed-red?style=for-the-badge&labelColor=0d1117&logo=data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+CjxzdmcgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOmNjPSJodHRwOi8vd2ViLnJlc291cmNlLm9yZy9jYy8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6c3ZnPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgaWQ9InN2ZzIiIHZpZXdCb3g9IjAgMCA4NC44NTMgODQuODUzIiB2ZXJzaW9uPSIxLjAiPgogIDxnIGlkPSJsYXllcjEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0xNTMuMjkgLTEzMi43OSkiPgogICAgPGcgaWQ9ImcyNzYyIiB0cmFuc2Zvcm09Im1hdHJpeCguNzA3MTEgLS43MDcxMSAuNzA3MTEgLjcwNzExIC02Ni41NzUgMTg5LjcxKSIgZmlsbD0icmVkIj4KICAgICAgPHJlY3QgaWQ9InJlY3QxODcyIiB5PSIxNjUuMjIiIHdpZHRoPSIxMDAiIHg9IjE0NS43MSIgaGVpZ2h0PSIyMCIvPgogICAgICA8cmVjdCBpZD0icmVjdDE4NzQiIHRyYW5zZm9ybT0icm90YXRlKDkwKSIgaGVpZ2h0PSIyMCIgd2lkdGg9IjEwMCIgeT0iLTIwNS43MSIgeD0iMTI1LjIyIi8+CiAgICA8L2c+CiAgPC9nPgogIDxtZXRhZGF0YT4KICAgIDxyZGY6UkRGPgogICAgICA8Y2M6V29yaz4KICAgICAgICA8ZGM6Zm9ybWF0PmltYWdlL3N2Zyt4bWw8L2RjOmZvcm1hdD4KICAgICAgICA8ZGM6dHlwZSByZGY6cmVzb3VyY2U9Imh0dHA6Ly9wdXJsLm9yZy9kYy9kY21pdHlwZS9TdGlsbEltYWdlIi8+CiAgICAgICAgPGNjOmxpY2Vuc2UgcmRmOnJlc291cmNlPSJodHRwOi8vY3JlYXRpdmVjb21tb25zLm9yZy9saWNlbnNlcy9wdWJsaWNkb21haW4vIi8+CiAgICAgICAgPGRjOnB1Ymxpc2hlcj4KICAgICAgICAgIDxjYzpBZ2VudCByZGY6YWJvdXQ9Imh0dHA6Ly9vcGVuY2xpcGFydC5vcmcvIj4KICAgICAgICAgICAgPGRjOnRpdGxlPk9wZW5jbGlwYXJ0PC9kYzp0aXRsZT4KICAgICAgICAgIDwvY2M6QWdlbnQ+CiAgICAgICAgPC9kYzpwdWJsaXNoZXI+CiAgICAgICAgPGRjOnRpdGxlPlggaWNvbjwvZGM6dGl0bGU+CiAgICAgICAgPGRjOmRhdGU+MjAwOC0wNC0wNFQwMzoyODo1MjwvZGM6ZGF0ZT4KICAgICAgICA8ZGM6ZGVzY3JpcHRpb24+R2FtZSBEZXNpZ24gZm9yIHB5d2VlayM2PC9kYzpkZXNjcmlwdGlvbj4KICAgICAgICA8ZGM6c291cmNlPmh0dHA6Ly9vcGVuY2xpcGFydC5vcmcvZGV0YWlsLzE2MTU1L3gtaWNvbi1ieS1taWxrZXItMTYxNTU8L2RjOnNvdXJjZT4KICAgICAgICA8ZGM6Y3JlYXRvcj4KICAgICAgICAgIDxjYzpBZ2VudD4KICAgICAgICAgICAgPGRjOnRpdGxlPm1pbGtlcjwvZGM6dGl0bGU+CiAgICAgICAgICA8L2NjOkFnZW50PgogICAgICAgIDwvZGM6Y3JlYXRvcj4KICAgICAgICA8ZGM6c3ViamVjdD4KICAgICAgICAgIDxyZGY6QmFnPgogICAgICAgICAgICA8cmRmOmxpPmNsaXAgYXJ0PC9yZGY6bGk+CiAgICAgICAgICAgIDxyZGY6bGk+Y2xpcGFydDwvcmRmOmxpPgogICAgICAgICAgICA8cmRmOmxpPmdhbWU8L3JkZjpsaT4KICAgICAgICAgICAgPHJkZjpsaT5pY29uPC9yZGY6bGk+CiAgICAgICAgICAgIDxyZGY6bGk+aW1hZ2U8L3JkZjpsaT4KICAgICAgICAgICAgPHJkZjpsaT5tZWRpYTwvcmRmOmxpPgogICAgICAgICAgICA8cmRmOmxpPnBuZzwvcmRmOmxpPgogICAgICAgICAgICA8cmRmOmxpPnB1YmxpYyBkb21haW48L3JkZjpsaT4KICAgICAgICAgICAgPHJkZjpsaT5zdmc8L3JkZjpsaT4KICAgICAgICAgIDwvcmRmOkJhZz4KICAgICAgICA8L2RjOnN1YmplY3Q+CiAgICAgIDwvY2M6V29yaz4KICAgICAgPGNjOkxpY2Vuc2UgcmRmOmFib3V0PSJodHRwOi8vY3JlYXRpdmVjb21tb25zLm9yZy9saWNlbnNlcy9wdWJsaWNkb21haW4vIj4KICAgICAgICA8Y2M6cGVybWl0cyByZGY6cmVzb3VyY2U9Imh0dHA6Ly9jcmVhdGl2ZWNvbW1vbnMub3JnL25zI1JlcHJvZHVjdGlvbiIvPgogICAgICAgIDxjYzpwZXJtaXRzIHJkZjpyZXNvdXJjZT0iaHR0cDovL2NyZWF0aXZlY29tbW9ucy5vcmcvbnMjRGlzdHJpYnV0aW9uIi8+CiAgICAgICAgPGNjOnBlcm1pdHMgcmRmOnJlc291cmNlPSJodHRwOi8vY3JlYXRpdmVjb21tb25zLm9yZy9ucyNEZXJpdmF0aXZlV29ya3MiLz4KICAgICAgPC9jYzpMaWNlbnNlPgogICAgPC9yZGY6UkRGPgogIDwvbWV0YWRhdGE+Cjwvc3ZnPgo=
           reactions: eyes
