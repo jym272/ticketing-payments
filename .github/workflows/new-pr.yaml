@@ -36,42 +36,24 @@ jobs:
     needs: [ code_quality_check ]
     if: ${{ failure() && needs.code_quality_check.outputs.tests-failed == 'true' }}
     steps:
-      - run: echo ${{ toJSON(github.event.workflow_run) }}
+      - run: echo ${{ toJson(github.event) }}
       - name: Get Artifact and Pull request info
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          WORKFLOW_RUN_EVENT_OBJ: ${{ toJSON(github.event.workflow_run) }}
+          PR_NUMBER: ${{ github.event.number }}
           OWNER: ${{ github.repository_owner }}
           REPO: ${{ github.event.repository.name }}
         run: |
-          PREVIOUS_JOB_ID=$(jq -r '.id' <<< "$WORKFLOW_RUN_EVENT_OBJ")
-          echo "Previous Job ID: $PREVIOUS_JOB_ID"
-          echo "PREVIOUS_JOB_ID=$PREVIOUS_JOB_ID" >> "$GITHUB_ENV"
-          
-          SUITE_ID=$(jq -r '.check_suite_id' <<< "$WORKFLOW_RUN_EVENT_OBJ")
-          echo "Previous Suite ID: $SUITE_ID"
-          echo "SUITE_ID=$SUITE_ID" >> "$GITHUB_ENV"
-          
-          ARTIFACT_ID=$(gh api "/repos/$OWNER/$REPO/actions/artifacts" \
-            --jq ".artifacts.[] |
-            select(.workflow_run.id==${PREVIOUS_JOB_ID}) |
-            select(.expired==false) |
-            .id")
-          
-          echo "Artifact ID: $ARTIFACT_ID"
-          echo "ARTIFACT_ID=$ARTIFACT_ID" >> "$GITHUB_ENV"
-          
-          PR_NUMBER=$(jq -r '.pull_requests[0].number' \
-            <<< "$WORKFLOW_RUN_EVENT_OBJ")
-          
-          echo "Pull request Number: $PR_NUMBER"
-          echo "PR_NUMBER=$PR_NUMBER" >> "$GITHUB_ENV"
-          
-          HEAD_SHA=$(jq -r '.pull_requests[0].head.sha' \
-            <<< "$WORKFLOW_RUN_EVENT_OBJ")
-          
-          echo "Head SHA: $HEAD_SHA"
-          echo "HEAD_SHA=$HEAD_SHA" >> "$GITHUB_ENV"
+          # Set PR_NUMBER to the PR number if it is a pull request
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            PR_NUMBER=$GITHUB_EVENT_NUMBER
+            echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV  
+          fi
+          # Current job id
+          CURRENT_JOB_ID=$(echo $GITHUB_JOB | cut -d'.' -f1)
+          # Set in github env the CURRENT_JOB_ID
+          echo "CURRENT_JOB_ID=$CURRENT_JOB_ID" >> $GITHUB_ENV
+
       - name: Find Comment
         uses: peter-evans/find-comment@v2
         id: find-comment
@@ -80,7 +62,7 @@ jobs:
           comment-author: 'github-actions[bot]'
       - name: Update Comment
         env:
-          JOB_PATH: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ env.PREVIOUS_JOB_ID }}"
+          JOB_PATH: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ env.CURRENT_JOB_ID }}"
           ARTIFACT_URL: "${{ github.server_url }}/${{ github.repository }}/suites/$SUITE_ID/artifacts/$ARTIFACT_ID"
           HEAD_SHA: "${{ env.HEAD_SHA }}"
         uses: peter-evans/create-or-update-comment@v3
