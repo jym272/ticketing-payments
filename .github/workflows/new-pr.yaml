@@ -42,21 +42,29 @@ jobs:
       - name: Prepare Links
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          OWNER: ${{ github.repository_owner }}
-          REPO: ${{ github.event.repository.name }}
+          ARTIFACT_NAME: report
+          REPO: ${{ github.repository }}
         run: |
-          # https://github.com/jym272/ticketing-payments/actions/runs/4775993788
-#          JOB_ID=$(gh api "/repos/$OWNER/$REPO/actions/runs" \
-#            --jq ".workflow_runs.[] |
-#            select(.head_sha==\"${{ github.sha }}\") |
-#            select(.event==\"pull_request\") |
-#            .id")
-#          ARTIFACT_URL=$(gh api "/repos/$OWNER/$REPO/actions/artifacts" \
-#            --jq ".artifacts.[] |
-#            select(.workflow_run.id==${JOB_ID}) |
-#            select(.expired==false) |
-#            .archive_download_url")
+          check_suite_id=$(gh api \
+            /repos/${{ github.repository }}/actions/runs/${{ github.run_id }} \
+            | jq -r '.check_suite_id')
+
+          echo "check_suite_id: ${check_suite_id}"
+  
+          artifact_id=$(gh api \
+            /repos/${{ github.repository }}/actions/artifacts \
+            | jq -r ".artifacts[] | select(.name == \"${ARTIFACT_NAME}\" and .expired == false) | select(.workflow_run.id == ${{ github.run_id }}}) | .id")
+
+          echo "artifact_id: ${artifact_id}"
+
+
+          if [[ -n "${check_suite_id}" && -n "${artifact_id}" ]]; then
+            ARTIFACT_URL="${{ github.server_url }}/${{ github.repository }}/suites/${check_suite_id}/artifacts/${artifact_id}"
+            echo "ARTIFACT_URL: ${ARTIFACT_URL}"
+            echo "ARTIFACT_URL=$ARTIFACT_URL" >> "$GITHUB_ENV"
+          else
+            echo "No artifact found"
+          fi
 
       - name: Find Comment
         uses: peter-evans/find-comment@v2
@@ -65,12 +73,12 @@ jobs:
           issue-number: ${{ github.event.pull_request.number }}
           comment-author: 'github-actions[bot]'
           body-includes: Links for artifacts
-
 # what happens if there is no more error
       - name: Create or update comment
         uses: peter-evans/create-or-update-comment@v3
         env:
           JOB_PATH: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          ARTIFACT_URL: ${{ env.ARTIFACT_URL }}
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
