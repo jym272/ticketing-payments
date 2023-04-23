@@ -245,7 +245,7 @@ test.describe('listener: orderUpdated Order does not exist, maybe is not created
     );
     const order = JSON.parse(res) as Order;
     expect(order.id).toBe(id);
-    expect(order.version).toBe(1);
+    expect(order.version).toBe(100);
     expect(order.status).toBe(orderUpdated1.status);
     expect(order.ticket.price).toBe(orderUpdated1.ticket.price);
     expect(order.userId).toBe(orderUpdated1.userId);
