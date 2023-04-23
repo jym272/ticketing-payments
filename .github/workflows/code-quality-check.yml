@@ -1,17 +1,10 @@
 name: reusable-code_quality_check
 on:
   workflow_call:
-    inputs:
-      report-name:
-        description: "Report name if tests fails"
-        required: false
-        default: report
-        type: string
     outputs:
       tests-failed:
         description: "Specifies whether the given commands failed"
         value: ${{ jobs.test.outputs.TESTS_FAILED }}
-    # TODO: if a test fail a report has to be generated and sent to the PR, OUTPUT
 env:
   # Log color in the test output
   FORCE_COLOR: 1
@@ -71,7 +64,7 @@ jobs:
         uses: actions/upload-artifact@v3
         id: upload-report
         with:
-          name: ${{ inputs.report-name }}
+          name: test-report
           path: ./playwright-report
       -
         name: Set Output if tests fail
