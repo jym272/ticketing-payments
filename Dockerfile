@@ -1,4 +1,4 @@
-FROM node:19-alpine AS base
+FROM node:20-alpine AS base
 
 FROM base as deps
 
@@ -9,7 +9,7 @@ COPY package.json package-lock.json ./
 # clean install - omit devDependencies
 RUN npm ci --omit=dev
 
-FROM node:19-alpine as builder
+FROM base as builder
 
 WORKDIR /app
 
