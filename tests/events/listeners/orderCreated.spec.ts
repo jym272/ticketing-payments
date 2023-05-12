@@ -88,7 +88,10 @@ test.describe('listener: orderCreated already an order in db', () => {
     });
   });
   test('fails because is already an order with the same id in db', async () => {
-    const newPrice = Number(createAValidPrice());
+    let newPrice = Number(createAValidPrice());
+    while (newPrice === price) {
+      newPrice = Number(createAValidPrice());
+    }
     await publishToSubject(subjects.OrderCreated, {
       [subjects.OrderCreated]: {
         id,

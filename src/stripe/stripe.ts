@@ -1,5 +1,5 @@
 import Stripe from 'stripe';
-import { getEnvOrFail } from '@utils/env';
+import { getEnvOrFail } from '@jym272ticketing/common/dist/utils';
 
 const apiKey = getEnvOrFail('STRIPE_SECRET_KEY');
 

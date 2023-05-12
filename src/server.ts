@@ -1,10 +1,10 @@
 import { initializeSetup, startSetup } from './setup';
 import { utils } from '@jym272ticketing/common';
 const { log, successConnectionMsg } = utils;
-import { getEnvOrFail, rocketEmoji } from '@utils/index';
 import { orderCreatedListener, orderUpdatedListener } from '@events/index';
 import { nc, startJetStream, Streams, subjects, subscribe } from '@jym272ticketing/common/dist/events';
 import { createStripeClient } from '@stripe/stripe';
+import { getEnvOrFail, rocketEmoji } from '@jym272ticketing/common/dist/utils';
 
 const { server } = initializeSetup();
 

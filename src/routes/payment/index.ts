@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { paymentController } from '@controllers/payment';
 import { commonController } from '@jym272ticketing/common';
-import { getEnvOrFail } from '@utils/env';
+import { getEnvOrFail } from '@jym272ticketing/common/dist/utils';
 const { verifyCurrentUser, requireAuth } = commonController;
 const { createAPayment } = paymentController;
 
