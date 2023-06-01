@@ -1,6 +1,6 @@
-### Multinetwork Payments API
+## Payments Api
 
-#### Part of [multinetwork project](https://github.com/jym272/multinetwork-k8s)
+#### Part of [Microservices on Kubernetes](https://github.com/jym272/ticketing) Project
 
 This project needs a secret key to run tests.
 Set the **STRIPE_SECRET_KEY** environment variable to
